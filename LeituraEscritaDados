@@ -1,0 +1,306 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyOI9U6tkqdDp9zzyncM6c+x",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/JoaoRubensUva/Analise-mercado-de-a-es/blob/main/LeituraEscritaDados\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 6,
+      "metadata": {
+        "id": "RRFSGWHsqyg1",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "collapsed": true,
+        "outputId": "a7209131-efb0-46af-bf09-9aee333af000"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Requirement already satisfied: pyspark in /usr/local/lib/python3.12/dist-packages (4.0.2)\n",
+            "Requirement already satisfied: py4j<0.10.9.10,>=0.10.9.7 in /usr/local/lib/python3.12/dist-packages (from pyspark) (0.10.9.9)\n"
+          ]
+        }
+      ],
+      "source": [
+        "!pip install pyspark"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import pyspark\n",
+        "from pyspark.sql import SparkSession\n"
+      ],
+      "metadata": {
+        "id": "DAzitoJZsPxx"
+      },
+      "execution_count": 10,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "spark = SparkSession.builder.getOrCreate()"
+      ],
+      "metadata": {
+        "id": "Kg0ZEEg5sXkk"
+      },
+      "execution_count": 11,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "data = [(\"Alice\", 1), (\"Bob\", 2), (\"Charlie\", 3)]\n",
+        "columns = [\"Name\", \"ID\"]\n",
+        "df = spark.createDataFrame(data, columns)\n",
+        "\n",
+        "df.show()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "collapsed": true,
+        "id": "COyv_2K3seu4",
+        "outputId": "1a32d685-826a-4bfc-e6e4-ca21cfa5e5de"
+      },
+      "execution_count": 14,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+-------+---+\n",
+            "|   Name| ID|\n",
+            "+-------+---+\n",
+            "|  Alice|  1|\n",
+            "|    Bob|  2|\n",
+            "|Charlie|  3|\n",
+            "+-------+---+\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df.write.csv('output/clientes.csv')"
+      ],
+      "metadata": {
+        "id": "aLgMFyJosuA0"
+      },
+      "execution_count": 15,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df.write.mode('overwrite').option('header', 'true').option('inferSchema', 'true').csv('clientes/clientes_csv')"
+      ],
+      "metadata": {
+        "id": "kIm5enWVs5Hl"
+      },
+      "execution_count": 17,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df = spark.read.option('headre','True').option('inferSchema','True').csv('output/clientes.csv')\n"
+      ],
+      "metadata": {
+        "id": "QfDqifIBtlsJ"
+      },
+      "execution_count": 18,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df.coalesce(1).write.json('output/clientes.json')"
+      ],
+      "metadata": {
+        "id": "GSFx0Ke9uYSD"
+      },
+      "execution_count": 20,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df = spark.read.json('output/clientes.json')\n",
+        "df.show()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "collapsed": true,
+        "id": "KKr_U9oCurIg",
+        "outputId": "4524bcc4-787d-4301-a0cb-07a08b4203c9"
+      },
+      "execution_count": 23,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+-------+---+\n",
+            "|    _c0|_c1|\n",
+            "+-------+---+\n",
+            "|    Bob|  2|\n",
+            "|Charlie|  3|\n",
+            "|  Alice|  1|\n",
+            "+-------+---+\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df.write.option('header', 'true').saveAsTable('cliente')"
+      ],
+      "metadata": {
+        "id": "-ruzxnr1vOKZ"
+      },
+      "execution_count": 24,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df.createOrReplaceGlobalTempView('temp_cliente')"
+      ],
+      "metadata": {
+        "id": "bC4ndPcuvgH0"
+      },
+      "execution_count": 25,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "spark.catalog.listDatabases('default')"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "YlzfFPNayxoX",
+        "outputId": "2aac5937-368d-488d-bf10-6e13a736d777"
+      },
+      "execution_count": 26,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "[Database(name='default', catalog='spark_catalog', description='default database', locationUri='file:/content/spark-warehouse')]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 26
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "spark.catalog.listTables()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "GYBlL9vAy5xA",
+        "outputId": "34fc0237-c401-4c49-95be-b113e862461c"
+      },
+      "execution_count": 27,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "[Table(name='cliente', catalog='spark_catalog', namespace=['default'], description=None, tableType='MANAGED', isTemporary=False)]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 27
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "tab_df = spark.sql('select* from cliente')\n",
+        "tab_df.show()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "collapsed": true,
+        "id": "AvOatLcgzFjS",
+        "outputId": "1f1678e1-3767-444c-e3e3-ab5bce029bbf"
+      },
+      "execution_count": 29,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+-------+---+\n",
+            "|    _c0|_c1|\n",
+            "+-------+---+\n",
+            "|    Bob|  2|\n",
+            "|Charlie|  3|\n",
+            "|  Alice|  1|\n",
+            "+-------+---+\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "spark.stop()"
+      ],
+      "metadata": {
+        "id": "-ZBn8bxczZAu"
+      },
+      "execution_count": 30,
+      "outputs": []
+    }
+  ]
+}
